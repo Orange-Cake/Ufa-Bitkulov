@@ -1,17 +1,54 @@
+# Библиотеки
+
 import pygame
 import random
 
 # Список цветов от фигур
-colors = [
-    (0, 0, 0),
-    ('#deaa88'),
-    ('#7b917b'),
-    ('#87cefa'),
-    ('#ab4f56'),
-    ('#9966cc'),
-    ('#e0007b'),
-
+colors_1 = [
+    '#ff0000',
+    '#f8173e',
+    '#ba021e',
+    '#f75216',
+    '#ff5349',
+    '#f23f1f',
 ]
+colors_3 = [
+    '#0000ff',
+    '#00001a',
+    '#a366ff',
+    '#5d76cb',
+    '#7fc7ff',
+    '#00ffff',
+]
+
+colors_2 = [
+    '#ffff00',
+    '#ccff00',
+    '#f3da0b',
+    '#ccad00',
+    '#ffa161',
+    '#ffe14d',
+]
+
+colors_4 = [
+    '#008000',
+    '#00ff00',
+    '#7cfc00',
+    '#bfff00',
+    '#0bda51',
+    '#00fa9a',
+]
+
+colors_5 = [
+    '#808080',
+    '#898176',
+    '#a18594',
+    '#979aaa',
+    '#9c9c9c',
+    '#99958c',
+]
+
+colors_used = colors_1
 
 
 # Создание класса
@@ -21,7 +58,6 @@ class Figure:
     y = 0
 
     # Все позиции фигур, и их возможные перевертыши :D
-
     figures = [
         [[1, 5, 9, 13], [4, 5, 6, 7]],
         [[4, 5, 9, 10], [2, 6, 5, 9]],
@@ -36,7 +72,7 @@ class Figure:
         self.x = x
         self.y = y
         self.type = random.randint(0, len(self.figures) - 1)
-        self.color = random.randint(1, len(colors) - 1)
+        self.colors_used = random.randint(1, len(colors_used) - 1)
         self.rotation = 0
 
     def image(self):
@@ -49,6 +85,7 @@ class Figure:
 # Создание класса тетриса
 
 class Tetris:
+    # переменные класса тетрис
     level = 2
     score = 0
     state = "start"
@@ -75,6 +112,7 @@ class Tetris:
                 new_line.append(0)
             self.field.append(new_line)
 
+    # Функция создания фигуры
     def new_figure(self):
         self.figure = Figure(3, 0)
 
@@ -91,6 +129,7 @@ class Tetris:
                         crossing = True
         return crossing
 
+    # Функция рисования сеточки
     def break_lines(self):
         lines = 0
         for i in range(1, self.height):
@@ -105,24 +144,26 @@ class Tetris:
                         self.field[i1][j] = self.field[i1 - 1][j]
         self.score += lines ** 2
 
+    # Функция падения фигуры
     def go_space(self):
         while not self.cross():
             self.figure.y += 1
         self.figure.y -= 1
         self.stop()
 
+    # Функция спуска фигуры
     def go_down(self):
         self.figure.y += 1
         if self.cross():
             self.figure.y -= 1
             self.stop()
 
-
+    # Цикл остановки фигуры
     def stop(self):
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.figure.image():
-                    self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
+                    self.field[i + self.figure.y][j + self.figure.x] = self.figure.colors_used
         self.break_lines()
         self.new_figure()
         if self.cross():
@@ -149,9 +190,11 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
+# Размер рамки
 size = (400, 500)
 screen = pygame.display.set_mode(size)
 
+# Название программы
 pygame.display.set_caption("Тетрис")
 
 # Цикл,пока пользователь не нажмет кнопку закрытия.
@@ -192,13 +235,23 @@ while not done:
                 game.go_space()
             if event.key == pygame.K_ESCAPE:
                 game.__init__(20, 10)
+            if event.key == pygame.K_1:
+                colors_used = colors_1
+            if event.key == pygame.K_2:
+                colors_used = colors_2
+            if event.key == pygame.K_3:
+                colors_used = colors_3
+            if event.key == pygame.K_4:
+                colors_used = colors_4
+            if event.key == pygame.K_5:
+                colors_used = colors_5
 
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_DOWN:
             pressing_down = False
 
     # Цвет фона
-    screen.fill('#b3a59d')
+    screen.fill(WHITE)
 
     # Положение фигур
 
@@ -206,7 +259,7 @@ while not done:
         for j in range(game.width):
             pygame.draw.rect(screen, BLACK, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
             if game.field[i][j] > 0:
-                pygame.draw.rect(screen, colors[game.field[i][j]],
+                pygame.draw.rect(screen, colors_used[game.field[i][j]],
                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 
     if game.figure is not None:
@@ -214,19 +267,31 @@ while not done:
             for j in range(4):
                 p = i * 4 + j
                 if p in game.figure.image():
-                    pygame.draw.rect(screen, colors[game.figure.color],
+                    pygame.draw.rect(screen, colors_used[game.figure.colors_used],
                                      [game.x + game.zoom * (j + game.figure.x) + 1,
                                       game.y + game.zoom * (i + game.figure.y) + 1,
                                       game.zoom - 2, game.zoom - 2])
 
-
     font = pygame.font.SysFont('Calibri', 25, True, False)
     font1 = pygame.font.SysFont('Calibri', 65, True, False)
 
+    # Создание своего оттенка финального цвета в зависимости от темы.
+    color_1 = '#ff0000'
+    if colors_used == colors_1:
+        color_1 = '#ff496c'
+    if colors_used == colors_2:
+        color_1 = '#ffd700'
+    if colors_used == colors_3:
+        color_1 = '#660099'
+    if colors_used == colors_4:
+        color_1 = '#5da130'
+    if colors_used == colors_5:
+        color_1 = BLACK
+
     # Финальный текст
     text = font.render("Cчёт: " + str(game.score), True, BLACK)
-    text_game_over = font1.render("Вы проиграли.", True, '#e0000f')
-    text_game_over1 = font1.render("Нажми ESC", True, '#e0000f')
+    text_game_over = font1.render("Вы проиграли.", True, color_1)
+    text_game_over1 = font1.render("Нажми ESC", True, color_1)
 
     # Вывод текста и его расположение.
     screen.blit(text, [0, 0])
